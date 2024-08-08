@@ -6,8 +6,7 @@ def start_perceptron(X, y, w, alpha, max_iter):
     count = 0
     updates = 0
     iteration = 0
-    total = len(X) 
-    print(total)
+    total = len(y)
     
     while run:
         if count >= total:

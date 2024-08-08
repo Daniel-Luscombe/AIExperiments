@@ -14,8 +14,10 @@ df = df.drop(columns=['Name', 'Ticket', 'Cabin', 'Embarked', 'PassengerId', 'Par
 df.insert(loc=1, column='bias', value=1)
 # Using map function convert male and female to 1, 0
 df['Sex'] = df['Sex'].map({'male': 1, 'female': 0})
+#fill in missing ages
+df['Age'] = df['Age'].fillna(-1)
 #remove rows with missing data
-df = df.dropna()
+#df = df.dropna()
 
 # find averages for age and fare
 avg_age = df.loc[:, 'Age'].mean()
@@ -27,8 +29,8 @@ y_vector = df['Survived'].to_numpy()
 X_matrix = np.array(df.drop(columns='Survived').iloc[:,0:6])
 
 #run perceptron
-alpha = 0.08
-max_iter = 10000000
+alpha = 0.01
+max_iter = 20000000
 w = p.start_perceptron(X_matrix, y_vector, w_vector, alpha, max_iter)
 
 # Perceptron prediction function
@@ -45,14 +47,19 @@ def calculate_accuracy(X, y, w):
 accuracy = calculate_accuracy(X_matrix, y_vector, w)
 print("Accuracy:", accuracy)
 
-# Data Preprocessing for test data
+#Data Preprocessing for test data
 final_submission = df_test['PassengerId']
 #remove columns that are not useful
 df_test = df_test.drop(columns=['Name', 'Ticket', 'Cabin', 'Embarked', 'PassengerId', 'Parch', 'SibSp'])
 #add bias column
 df_test.insert(loc=1, column='bias', value=1)
-# Using map
-df_test['Sex'] = df['Sex'].map({'male': 1, 'female': 0})
+#Using map
+df_test['Sex'] = df_test['Sex'].map({'male': 1, 'female': 0})
+#fill in missing ages
+df_test['Age'] = df_test['Age'].fillna(-1)
 
-print(df.head)
-print(df_test.head)
+X_matrix_test = np.array(df_test.iloc[:,0:6])
+predictions = perceptron_predict(X_matrix_test, w)
+final_submission = pd.concat([final_submission, pd.DataFrame(predictions)], axis=1)
+final_submission.columns = ['PassengerId', 'Survived']
+final_submission.to_csv(data_path + 'submission.csv', index=False)
