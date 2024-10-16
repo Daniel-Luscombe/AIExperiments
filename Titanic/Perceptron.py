@@ -43,4 +43,3 @@ def start_perceptron(X, y, w, alpha, max_iter):
             break
             
     return w
-            
