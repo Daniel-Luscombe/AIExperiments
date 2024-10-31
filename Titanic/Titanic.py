@@ -1,37 +1,13 @@
 import pandas as pd
 import numpy as np
 import Perceptron as p
-
-# Load the dataset
-data_path = "/Users/DLuscombe/Library/Mobile Documents/com~apple~CloudDocs/Northeastern/Projects/AIExperiments/Titanic/Dataset/"
-df = pd.read_csv(data_path + 'train.csv')
-df_test = pd.read_csv(data_path + 'test.csv')
-
-# Data Preprocessing
-#remove columns that are not useful
-df = df.drop(columns=['Name', 'Ticket', 'Cabin', 'Embarked', 'PassengerId', 'Parch', 'SibSp'])
-#add bias column
-df.insert(loc=1, column='bias', value=1)
-# Using map function convert male and female to 1, 0
-df['Sex'] = df['Sex'].map({'male': 1, 'female': 0})
-#fill in missing ages
-df['Age'] = df['Age'].fillna(-1)
-#remove rows with missing data
-#df = df.dropna()
-
-# find averages for age and fare
-avg_age = df.loc[:, 'Age'].mean()
-avg_fare = df.loc[:, 'Fare'].mean()
-
-#init data to matrix and vector values
-w_vector = np.array([-1, 2, 1, avg_age, avg_fare])
-y_vector = df['Survived'].to_numpy()
-X_matrix = np.array(df.drop(columns='Survived').iloc[:,0:6])
+from Test.preprocessing_titanic import Phi_train, y_train, Phi_test, y_test, Phi_val, y_val
+import os
 
 #run perceptron
 alpha = 0.01
-max_iter = 20000000
-w = p.start_perceptron(X_matrix, y_vector, w_vector, alpha, max_iter)
+max_iter = 2000
+w = p.start_perceptron(Phi_train, y_train, np.ones(Phi_train.shape[1]), alpha, max_iter)
 
 # Perceptron prediction function
 def perceptron_predict(X, w):
@@ -44,22 +20,12 @@ def calculate_accuracy(X, y, w):
     return accuracy
 
 # Test the accuracy
-accuracy = calculate_accuracy(X_matrix, y_vector, w)
+accuracy = calculate_accuracy(Phi_test, y_test, w)
 print("Accuracy:", accuracy)
 
 #Data Preprocessing for test data
+df_test = pd.read_csv(os.path.join('Test/test.csv'))
 final_submission = df_test['PassengerId']
-#remove columns that are not useful
-df_test = df_test.drop(columns=['Name', 'Ticket', 'Cabin', 'Embarked', 'PassengerId', 'Parch', 'SibSp'])
-#add bias column
-df_test.insert(loc=1, column='bias', value=1)
-#Using map
-df_test['Sex'] = df_test['Sex'].map({'male': 1, 'female': 0})
-#fill in missing ages
-df_test['Age'] = df_test['Age'].fillna(-1)
-
-X_matrix_test = np.array(df_test.iloc[:,0:6])
-predictions = perceptron_predict(X_matrix_test, w)
-final_submission = pd.concat([final_submission, pd.DataFrame(predictions)], axis=1)
+final_submission = pd.concat([final_submission, pd.DataFrame(perceptron_predict(Phi_val, w))], axis=1)
 final_submission.columns = ['PassengerId', 'Survived']
-final_submission.to_csv(data_path + 'submission.csv', index=False)
+final_submission.to_csv(os.path.join('Submission/perceptron_prediction.csv'), index=False)

@@ -1,12 +1,12 @@
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
+import os
 
 # Load the datasets
-df_train = pd.read_csv('train.csv')
-df_test = pd.read_csv('test.csv')
+df_train = pd.read_csv(os.getcwd() + '/Titanic/Test/train.csv')
+df_test = pd.read_csv(os.getcwd() + '/Titanic/Test/test.csv')
 
 #Preprocessing
 #dropping NaN features
